@@ -92,8 +92,7 @@ class NotificationService {
         body,
         scheduledTime,
         platformChannelSpecifics,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        androidAllowWhileIdle: true,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         payload: 'timetable_$id',
       );
 
@@ -147,6 +146,40 @@ class NotificationService {
       title: 'Test Notification',
       body: 'This is a test notification from EduTrack Pro',
       scheduleTime: DateTime.now().add(const Duration(seconds: 5)),
+    );
+  }
+
+  // Additional utility methods for better notification management
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await _notifications.pendingNotificationRequests();
+  }
+
+  Future<void> showInstantNotification({
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'instant_channel',
+      'Instant Notifications',
+      channelDescription: 'Instant notifications and alerts',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const darwinPlatformChannelSpecifics = DarwinNotificationDetails();
+
+    final platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: darwinPlatformChannelSpecifics,
+    );
+
+    await _notifications.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: payload,
     );
   }
 }

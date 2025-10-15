@@ -66,24 +66,59 @@ class Timetable {
   DateTime get nextOccurrence {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final days = _daysOfWeek.indexOf(dayOfWeek);
-    var nextDate = today.add(Duration(days: (days - today.weekday + 7) % 7));
+    final dayIndex = _daysOfWeek.indexOf(dayOfWeek);
+    if (dayIndex == -1) {
+      throw ArgumentError('Invalid dayOfWeek: $dayOfWeek');
+    }
+    final targetWeekday = dayIndex + 1; // Adjust to 1=Monday, 7=Sunday
+    final currentWeekday = today.weekday;
+    var daysToAdd = (targetWeekday - currentWeekday + 7) % 7;
+    var nextDate = today.add(Duration(days: daysToAdd));
 
-    // If it's today but time has passed, schedule for next week
-    final timeParts = startTime.split(':');
-    final classTime = DateTime(
-        nextDate.year,
-        nextDate.month,
-        nextDate.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1])
-    );
+    // Parse startTime, handling possible 12-hour format with AM/PM
+    String timeStr = startTime.trim();
+    bool isPM = false;
+    if (timeStr.endsWith(' PM')) {
+      timeStr = timeStr.substring(0, timeStr.length - 3).trim();
+      isPM = true;
+    } else if (timeStr.endsWith(' AM')) {
+      timeStr = timeStr.substring(0, timeStr.length - 3).trim();
+    }
+    final timeParts = timeStr.split(':');
+    if (timeParts.length < 2) {
+      throw ArgumentError('Invalid startTime format: $startTime');
+    }
+    int hour = int.parse(timeParts[0]);
+    int minute = int.parse(timeParts[1].split(' ')[0]); // In case extra space
 
-    if (classTime.isBefore(now)) {
-      nextDate = nextDate.add(const Duration(days: 7));
+    // Convert 12-hour to 24-hour if necessary
+    if (isPM && hour != 12) {
+      hour += 12;
+    } else if (!isPM && hour == 12) {
+      hour = 0;
     }
 
-    return nextDate;
+    DateTime classTime = DateTime(
+      nextDate.year,
+      nextDate.month,
+      nextDate.day,
+      hour,
+      minute,
+    );
+
+    // If the class time has already passed, schedule for next week
+    if (classTime.isBefore(now)) {
+      final futureDate = nextDate.add(const Duration(days: 7));
+      classTime = DateTime(
+        futureDate.year,
+        futureDate.month,
+        futureDate.day,
+        hour,
+        minute,
+      );
+    }
+
+    return classTime;
   }
 
   static final List<String> _daysOfWeek = [
