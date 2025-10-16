@@ -87,159 +87,167 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
 
     await showDialog(
       context: context,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        elevation: 16,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          child: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.deepPurple.shade600, Colors.purple.shade400],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(28),
-                        topRight: Radius.circular(28),
-                      ),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          elevation: 16,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.deepPurple.shade600, Colors.purple.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            edit == null ? Icons.person_add : Icons.edit,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            edit == null ? 'Add New Student' : 'Edit Student',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 22,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        _buildTextField(firstNameCtrl, 'First Name *', Icons.person, true),
-                        const SizedBox(height: 16),
-                        _buildTextField(middleNameCtrl, 'Middle Name', Icons.person_outline, false),
-                        const SizedBox(height: 16),
-                        _buildTextField(lastNameCtrl, 'Last Name *', Icons.person_outline, true),
-                        const SizedBox(height: 16),
-                        _buildTextField(gradeCtrl, 'Grade', Icons.school, false),
-                        const SizedBox(height: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          edit == null ? Icons.person_add : Icons.edit,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          edit == null ? 'Add New Student' : 'Edit Student',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20,
                           ),
-                          child: DropdownButtonFormField<String>(
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Form Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildTextField(firstNameCtrl, 'First Name *', Icons.person, true),
+                          const SizedBox(height: 14),
+                          _buildTextField(middleNameCtrl, 'Middle Name', Icons.person_outline, false),
+                          const SizedBox(height: 14),
+                          _buildTextField(lastNameCtrl, 'Last Name *', Icons.person_outline, true),
+                          const SizedBox(height: 14),
+                          _buildTextField(gradeCtrl, 'Grade', Icons.school, false),
+                          const SizedBox(height: 14),
+                          DropdownButtonFormField<String>(
                             value: selectedGender,
                             decoration: InputDecoration(
                               labelText: 'Gender',
                               prefixIcon: const Icon(Icons.transgender, color: Colors.deepPurple),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
                             items: const [
                               DropdownMenuItem(value: 'Male', child: Text('Male')),
                               DropdownMenuItem(value: 'Female', child: Text('Female')),
                               DropdownMenuItem(value: 'Other', child: Text('Other')),
                             ],
-                            onChanged: (value) => selectedGender = value,
+                            onChanged: (value) => setDialogState(() => selectedGender = value),
                           ),
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                  side: BorderSide(color: Colors.grey.shade300),
+                                  child: const Text('Cancel'),
                                 ),
-                                child: const Text('Cancel', style: TextStyle(fontSize: 16)),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.deepPurple,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.deepPurple,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                  elevation: 2,
-                                ),
-                                onPressed: () async {
-                                  if (formKey.currentState!.validate()) {
-                                    final student = Student(
-                                      id: edit?.id,
-                                      firstName: firstNameCtrl.text.trim(),
-                                      middleName: middleNameCtrl.text.trim(),
-                                      lastName: lastNameCtrl.text.trim(),
-                                      gender: selectedGender,
-                                      grade: gradeCtrl.text.trim(),
-                                    );
+                                  onPressed: () async {
+                                    if (formKey.currentState!.validate()) {
+                                      final student = Student(
+                                        id: edit?.id,
+                                        firstName: firstNameCtrl.text.trim(),
+                                        middleName: middleNameCtrl.text.trim(),
+                                        lastName: lastNameCtrl.text.trim(),
+                                        gender: selectedGender,
+                                        grade: gradeCtrl.text.trim(),
+                                      );
 
-                                    if (edit == null) {
-                                      await db.insertStudent(student);
-                                    } else {
-                                      await db.updateStudent(student);
+                                      if (edit == null) {
+                                        await db.insertStudent(student);
+                                      } else {
+                                        await db.updateStudent(student);
+                                      }
+
+                                      Navigator.pop(context);
+                                      await _load();
+
+                                      if (mounted) {
+                                        _showSuccessSnackbar(
+                                          '${edit == null ? 'Added' : 'Updated'} ${student.fullName}',
+                                          Icons.check_circle,
+                                        );
+                                      }
                                     }
-
-                                    Navigator.pop(context);
-                                    await _load();
-
-                                    _showSuccessSnackbar(
-                                      '${edit == null ? 'Added' : 'Updated'} ${student.fullName}',
-                                      Icons.check_circle,
-                                    );
-                                  }
-                                },
-                                child: const Text(
-                                  'Save Student',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                                  },
+                                  child: const Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -248,28 +256,25 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
   }
 
   Widget _buildTextField(TextEditingController controller, String label, IconData icon, bool required) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon, color: Colors.deepPurple),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.deepPurple),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        validator: required
-            ? (value) {
-          if (value == null || value.trim().isEmpty) {
-            return 'This field is required';
-          }
-          return null;
-        }
-            : null,
+        filled: true,
+        fillColor: Colors.grey.shade50,
       ),
+      validator: required
+          ? (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'This field is required';
+        }
+        return null;
+      }
+          : null,
     );
   }
 
@@ -363,7 +368,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           Navigator.pop(context);
 
           _showSuccessSnackbar(
-            'Successfully imported $successCount students${errorCount > 0 ? ', $errorCount failed' : ''}',
+            'Imported $successCount students${errorCount > 0 ? ', $errorCount failed' : ''}',
             Icons.upload_file,
           );
         } else {
@@ -384,7 +389,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: 600,
+            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 550),
             maxHeight: MediaQuery.of(context).size.height * 0.8,
           ),
           child: Column(
@@ -392,7 +397,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Colors.blue.shade600, Colors.blue.shade400],
@@ -402,75 +407,79 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                     topRight: Radius.circular(28),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.help_outline, color: Colors.white, size: 32),
-                      const SizedBox(width: 16),
-                      Text(
+                child: Row(
+                  children: [
+                    const Icon(Icons.help_outline, color: Colors.white, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: const Text(
                         'CSV Format Guide',
-                        style: const TextStyle(
-                          fontSize: 22,
+                        style: TextStyle(
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
                         'Required format for CSV import:',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: const Text(
+                            'First Name, Middle Name, Last Name, Gender, Grade\n'
+                                'John,Michael,Smith,Male,Grade 10\n'
+                                'Sarah,,Johnson,Female,Grade 9\n'
+                                'James,Robert,Wilson,Male,Grade 11',
+                            style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Alternative format (without middle name):',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: const Text(
+                            'First Name, Last Name, Gender, Grade\n'
+                                'John,Smith,Male,Grade 10\n'
+                                'Sarah,Johnson,Female,Grade 9',
+                            style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: const Text(
-                          'First Name, Middle Name, Last Name, Gender, Grade\n'
-                              'John,Michael,Smith,Male,Grade 10\n'
-                              'Sarah,,Johnson,Female,Grade 9\n'
-                              'James,Robert,Wilson,Male,Grade 11',
-                          style: TextStyle(fontFamily: 'monospace', fontSize: 13),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Alternative format (without middle name):',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: const Text(
-                          'First Name, Last Name, Gender, Grade\n'
-                              'John,Smith,Male,Grade 10\n'
-                              'Sarah,Johnson,Female,Grade 9',
-                          style: TextStyle(fontFamily: 'monospace', fontSize: 13),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: Colors.blue.shade50,
                           borderRadius: BorderRadius.circular(12),
@@ -480,12 +489,12 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                           children: [
                             Text(
                               'Important Notes:',
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                             ),
                             SizedBox(height: 8),
-                            Text('✓ First Name and Last Name are required'),
-                            Text('✓ Middle Name is optional'),
-                            Text('✓ Gender and Grade are optional'),
+                            Text('✓ First Name and Last Name are required', style: TextStyle(fontSize: 13)),
+                            Text('✓ Middle Name is optional', style: TextStyle(fontSize: 13)),
+                            Text('✓ Gender and Grade are optional', style: TextStyle(fontSize: 13)),
                           ],
                         ),
                       ),
@@ -494,18 +503,18 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: const EdgeInsets.all(20),
                 child: SizedBox(
                   width: double.infinity,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Got it!', style: TextStyle(fontSize: 16)),
+                    child: const Text('Got it!', style: TextStyle(fontSize: 15)),
                   ),
                 ),
               ),
@@ -525,18 +534,24 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             SizedBox(width: 12),
-            Text('Delete Student?', style: TextStyle(color: Colors.red)),
+            Flexible(
+              child: Text(
+                'Delete Student?',
+                style: TextStyle(color: Colors.red),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text(
           'Are you sure you want to delete ${s.fullName}? This action cannot be undone.',
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 15),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context, false),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Cancel'),
@@ -544,7 +559,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
@@ -568,7 +583,13 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           children: [
             Icon(icon, color: Colors.white),
             const SizedBox(width: 12),
-            Expanded(child: Text(message)),
+            Expanded(
+              child: Text(
+                message,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
           ],
         ),
         backgroundColor: Colors.green,
@@ -586,7 +607,13 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           children: [
             const Icon(Icons.error_outline, color: Colors.white),
             const SizedBox(width: 12),
-            Expanded(child: Text(message)),
+            Expanded(
+              child: Text(
+                message,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
           ],
         ),
         backgroundColor: Colors.red,
@@ -641,10 +668,10 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           onPressed: () => _showAddDialog(),
           backgroundColor: Colors.amber.shade600,
           foregroundColor: Colors.white,
-          icon: const Icon(Icons.person_add, size: 24),
+          icon: const Icon(Icons.person_add, size: 22),
           label: const Text(
             'Add Student',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           elevation: 6,
         ),
@@ -670,52 +697,51 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Students',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             letterSpacing: 0.5,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
-                        Text(
+                        const SizedBox(height: 4),
+                        const Text(
                           'Manage your database',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 13,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  Wrap(
+                    spacing: 6,
                     children: [
                       _buildHeaderIconButton(
                         icon: _isGridView ? Icons.list : Icons.grid_view,
                         onPressed: () => setState(() => _isGridView = !_isGridView),
                         tooltip: _isGridView ? 'List View' : 'Grid View',
                       ),
-                      const SizedBox(width: 6),
                       _buildHeaderIconButton(
                         icon: Icons.help_outline,
                         onPressed: _showCSVTemplate,
                         tooltip: 'CSV Format Guide',
                       ),
-                      const SizedBox(width: 6),
                       _buildHeaderIconButton(
                         icon: Icons.refresh,
                         onPressed: _load,
@@ -725,50 +751,57 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search by name, grade, or gender...',
+                    hintText: 'Search students...',
                     hintStyle: TextStyle(color: Colors.grey.shade400),
                     prefixIcon: Icon(Icons.search, color: Colors.deepPurple.shade400),
                     suffixIcon: searchController.text.isNotEmpty
                         ? IconButton(
                       icon: const Icon(Icons.clear, color: Colors.grey),
-                      onPressed: () {
-                        searchController.clear();
-                      },
+                      onPressed: () => searchController.clear(),
                     )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
-                    child: _buildActionButton(
-                      label: 'Import CSV',
-                      icon: Icons.upload_file,
-                      color: Colors.teal.shade400,
+                    child: ElevatedButton.icon(
                       onPressed: _importCSV,
+                      icon: const Icon(Icons.upload_file, size: 18),
+                      label: const Text(
+                        'Import CSV',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal.shade400,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   _buildSortButton(),
                 ],
               ),
@@ -787,32 +820,14 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
+        icon: Icon(icon, color: Colors.white, size: 20),
         tooltip: tooltip,
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required String label,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
-      label: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 2,
+        padding: const EdgeInsets.all(8),
+        constraints: const BoxConstraints(),
       ),
     );
   }
@@ -820,12 +835,12 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
   Widget _buildSortButton() {
     return PopupMenuButton<String>(
       icon: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.sort, color: Colors.white),
+        child: const Icon(Icons.sort, color: Colors.white, size: 20),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
@@ -834,71 +849,75 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
           _sortStudents();
         });
       },
-      itemBuilder: (_) => [
-        const PopupMenuItem(value: 'name', child: Text('Sort by Name')),
-        const PopupMenuItem(value: 'grade', child: Text('Sort by Grade')),
-        const PopupMenuItem(value: 'gender', child: Text('Sort by Gender')),
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'name', child: Text('Sort by Name')),
+        PopupMenuItem(value: 'grade', child: Text('Sort by Grade')),
+        PopupMenuItem(value: 'gender', child: Text('Sort by Gender')),
       ],
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Colors.deepPurple.shade50,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              searchController.text.isEmpty ? Icons.people_outline : Icons.search_off,
-              size: 80,
-              color: Colors.deepPurple.shade300,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            searchController.text.isEmpty ? 'No Students Yet' : 'No Results Found',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              searchController.text.isEmpty
-                  ? 'Start building your student database by adding your first student'
-                  : 'Try adjusting your search terms or filters',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey.shade500,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                searchController.text.isEmpty ? Icons.people_outline : Icons.search_off,
+                size: 70,
+                color: Colors.deepPurple.shade300,
               ),
             ),
-          ),
-          if (searchController.text.isEmpty) ...[
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () => _showAddDialog(),
-              icon: const Icon(Icons.add),
-              label: const Text('Add First Student'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            const SizedBox(height: 20),
+            Text(
+              searchController.text.isEmpty ? 'No Students Yet' : 'No Results Found',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Text(
+                searchController.text.isEmpty
+                    ? 'Start building your student database'
+                    : 'Try adjusting your search terms',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade500,
                 ),
               ),
             ),
+            if (searchController.text.isEmpty) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => _showAddDialog(),
+                icon: const Icon(Icons.add),
+                label: const Text('Add First Student'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -909,7 +928,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.78,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -926,110 +945,123 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
     return Card(
       elevation: 3,
       shadowColor: Colors.deepPurple.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: () => _showStudentDetails(student),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                children: [
-                  Hero(
-                    tag: 'avatar_${student.id}',
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            student.avatarColor,
-                            student.avatarColor.withOpacity(0.7),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Hero(
+                      tag: 'avatar_${student.id}',
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              student.avatarColor,
+                              student.avatarColor.withOpacity(0.7),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: student.avatarColor.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
                         ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: student.avatarColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          student.avatarText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                        child: Center(
+                          child: Text(
+                            student.avatarText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    student.fullName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  if (student.grade != null && student.grade!.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.deepPurple.shade50,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                    const SizedBox(height: 8),
+                    Flexible(
                       child: Text(
-                        student.grade!,
-                        style: TextStyle(
-                          color: Colors.deepPurple.shade700,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                        student.fullName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
                         ),
-                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                ],
+                    if (student.grade != null && student.grade!.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          student.grade!,
+                          style: TextStyle(
+                            color: Colors.deepPurple.shade700,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
+              const SizedBox(height: 4),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
-                    onPressed: () => _showAddDialog(edit: student),
-                    icon: const Icon(Icons.edit, size: 18),
-                    color: Colors.blue,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.blue.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  Flexible(
+                    child: IconButton(
+                      onPressed: () => _showAddDialog(edit: student),
+                      icon: const Icon(Icons.edit, size: 16),
+                      color: Colors.blue,
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.blue.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => _confirmDelete(student),
-                    icon: const Icon(Icons.delete, size: 18),
-                    color: Colors.red,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.red.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: IconButton(
+                      onPressed: () => _confirmDelete(student),
+                      icon: const Icon(Icons.delete, size: 16),
+                      color: Colors.red,
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.red.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
@@ -1076,8 +1108,8 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                     Hero(
                       tag: 'avatar_${student.id}',
                       child: Container(
-                        width: 56,
-                        height: 56,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -1091,7 +1123,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                           boxShadow: [
                             BoxShadow(
                               color: student.avatarColor.withOpacity(0.3),
-                              blurRadius: 8,
+                              blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -1102,13 +1134,13 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                              fontSize: 18,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1117,13 +1149,16 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                             student.fullName,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
-                          Row(
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
-                              if (student.grade != null && student.grade!.isNotEmpty) ...[
+                              if (student.grade != null && student.grade!.isNotEmpty)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
@@ -1133,14 +1168,13 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                                   child: Text(
                                     student.grade!,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: Colors.deepPurple.shade700,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                              ],
                               if (student.gender != null && student.gender!.isNotEmpty)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1151,10 +1185,11 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                                   child: Text(
                                     student.gender!,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: Colors.grey.shade700,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                             ],
@@ -1162,28 +1197,35 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => _showAddDialog(edit: student),
-                      icon: const Icon(Icons.edit_outlined, size: 22),
-                      color: Colors.blue,
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.blue.shade50,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () => _showAddDialog(edit: student),
+                          icon: const Icon(Icons.edit_outlined, size: 20),
+                          color: Colors.blue,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.blue.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.all(8),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    IconButton(
-                      onPressed: () => _confirmDelete(student),
-                      icon: const Icon(Icons.delete_outline, size: 22),
-                      color: Colors.red,
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.red.shade50,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          onPressed: () => _confirmDelete(student),
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          color: Colors.red,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.red.shade50,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding: const EdgeInsets.all(8),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -1202,68 +1244,70 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        student.avatarColor,
-                        student.avatarColor.withOpacity(0.7),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      student.avatarColor,
+                      student.avatarColor.withOpacity(0.7),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'avatar_${student.id}',
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              student.avatarText,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 32,
-                              ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Hero(
+                      tag: 'avatar_${student.id}',
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            student.avatarText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        student.fullName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      student.fullName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.white,
                       ),
-                    ],
-                  ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
                       _buildDetailRow('First Name:', student.firstName, Icons.person),
@@ -1279,20 +1323,20 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                         width: double.infinity,
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Close', style: TextStyle(fontSize: 16)),
+                          child: const Text('Close', style: TextStyle(fontSize: 15)),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1302,7 +1346,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
   Widget _buildDetailRow(String label, String value, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -1316,7 +1360,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
               color: Colors.deepPurple.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.deepPurple, size: 20),
+            child: Icon(icon, color: Colors.deepPurple, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1326,7 +1370,7 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1335,9 +1379,11 @@ class _StudentScreenState extends State<StudentScreen> with TickerProviderStateM
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ],
             ),

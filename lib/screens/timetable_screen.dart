@@ -78,80 +78,83 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
 
     await showDialog(
       context: context,
-      builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-        elevation: 16,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.purple.shade600, Colors.deepOrange.shade600],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        edit == null ? Icons.add : Icons.edit,
-                        color: Colors.white,
-                        size: 28,
-                      ),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          elevation: 16,
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.purple.shade600, Colors.deepOrange.shade600],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        edit == null ? 'Add Class' : 'Edit Class',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 22,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        overflow: TextOverflow.ellipsis,
+                        child: Icon(
+                          edit == null ? Icons.add : Icons.edit,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          edit == null ? 'Add Class' : 'Edit Class',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20,
                           ),
-                          child: TextFormField(
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Form Content
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Subject Field
+                          TextFormField(
                             controller: subjectCtrl,
                             decoration: InputDecoration(
                               labelText: 'Subject *',
                               prefixIcon: const Icon(Icons.subject, color: Colors.deepOrange),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -160,212 +163,257 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                               return null;
                             },
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: DropdownButtonFormField<String>(
+                          const SizedBox(height: 16),
+
+                          // Day Dropdown
+                          DropdownButtonFormField<String>(
                             value: selectedDayValue,
                             decoration: InputDecoration(
                               labelText: 'Day of Week',
                               prefixIcon: const Icon(Icons.calendar_today, color: Colors.deepOrange),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
                             items: daysOfWeek.map((day) {
                               return DropdownMenuItem(value: day, child: Text(day));
                             }).toList(),
                             onChanged: (value) {
                               if (value != null) {
-                                setState(() => selectedDayValue = value);
+                                setDialogState(() => selectedDayValue = value);
                               }
                             },
                           ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: ListTile(
-                                  leading: const Icon(Icons.access_time, color: Colors.deepOrange),
-                                  title: Text(startTime.format(context)),
-                                  onTap: () async {
+                          const SizedBox(height: 16),
+
+                          // Time Pickers
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
                                     final time = await showTimePicker(
                                       context: context,
                                       initialTime: startTime,
                                     );
-                                    if (time != null) setState(() => startTime = time);
+                                    if (time != null) {
+                                      setDialogState(() => startTime = time);
+                                    }
                                   },
+                                  icon: const Icon(Icons.access_time, size: 20),
+                                  label: Flexible(
+                                    child: Text(
+                                      startTime.format(context),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: ListTile(
-                                  leading: const Icon(Icons.access_time, color: Colors.deepOrange),
-                                  title: Text(endTime.format(context)),
-                                  onTap: () async {
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8),
+                                child: Icon(Icons.arrow_forward, size: 16),
+                              ),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
                                     final time = await showTimePicker(
                                       context: context,
                                       initialTime: endTime,
                                     );
-                                    if (time != null) setState(() => endTime = time);
+                                    if (time != null) {
+                                      setDialogState(() => endTime = time);
+                                    }
                                   },
+                                  icon: const Icon(Icons.access_time, size: 20),
+                                  label: Flexible(
+                                    child: Text(
+                                      endTime.format(context),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Classroom Field
+                          TextFormField(
+                            controller: classroomCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Classroom (Optional)',
+                              prefixIcon: const Icon(Icons.room, color: Colors.deepOrange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Notifications Toggle
+                          SwitchListTile(
+                            title: const Text('Enable Notifications'),
+                            value: notificationsEnabled,
+                            onChanged: (value) => setDialogState(() => notificationsEnabled = value),
+                            secondary: const Icon(Icons.notifications, color: Colors.deepOrange),
+                            activeColor: Colors.deepOrange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            tileColor: Colors.grey.shade50,
+                          ),
+
+                          // Notification Minutes Dropdown
+                          if (notificationsEnabled) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.orange.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.alarm, color: Colors.deepOrange, size: 20),
+                                  const SizedBox(width: 8),
+                                  const Text('Notify me', style: TextStyle(fontSize: 14)),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: DropdownButton<int>(
+                                      value: notificationMinutes,
+                                      isExpanded: true,
+                                      underline: const SizedBox(),
+                                      items: [5, 10, 15, 30, 60].map((minutes) {
+                                        return DropdownMenuItem(
+                                          value: minutes,
+                                          child: Text(
+                                            '$minutes min before',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          setDialogState(() => notificationMinutes = value);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: TextFormField(
-                            controller: classroomCtrl,
-                            decoration: InputDecoration(
-                              labelText: 'Classroom',
-                              prefixIcon: const Icon(Icons.room, color: Colors.deepOrange),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        SwitchListTile(
-                          title: const Text('Enable'),
-                          value: notificationsEnabled,
-                          onChanged: (value) => setState(() => notificationsEnabled = value),
-                          secondary: const Icon(Icons.notifications, color: Colors.deepOrange),
-                          activeColor: Colors.deepOrange,
-                        ),
-                        if (notificationsEnabled) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 20),
+
+                          // Action Buttons
                           Row(
                             children: [
-                              const Text('Notify me'),
-                              const SizedBox(width: 8),
-                              DropdownButton<int>(
-                                value: notificationMinutes,
-                                items: [5, 10, 15, 30, 60].map((minutes) {
-                                  return DropdownMenuItem(
-                                    value: minutes,
-                                    child: Text('$minutes min before'),
-                                  );
-                                }).toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => notificationMinutes = value);
-                                  }
-                                },
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text('Cancel'),
+                                ),
                               ),
-                              // const Text('class'),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: Colors.deepOrange,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    if (formKey.currentState!.validate()) {
+                                      final startTimeString =
+                                          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
+                                      final endTimeString =
+                                          '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
+
+                                      final timetableEntry = Timetable(
+                                        id: edit?.id,
+                                        subject: subjectCtrl.text.trim(),
+                                        dayOfWeek: selectedDayValue,
+                                        startTime: startTimeString,
+                                        endTime: endTimeString,
+                                        classroom: classroomCtrl.text.trim().isEmpty ? null : classroomCtrl.text.trim(),
+                                        notificationsEnabled: notificationsEnabled,
+                                        notificationMinutesBefore: notificationMinutes,
+                                      );
+
+                                      if (edit == null) {
+                                        await db.insertTimetable(timetableEntry);
+                                      } else {
+                                        await db.updateTimetable(timetableEntry);
+                                      }
+
+                                      Navigator.pop(context);
+                                      await _loadTimetable();
+                                      await _rescheduleNotifications();
+
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(this.context).showSnackBar(
+                                          SnackBar(
+                                            content: Row(
+                                              children: [
+                                                const Icon(Icons.check_circle, color: Colors.white),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    '${edit == null ? 'Added' : 'Updated'} ${timetableEntry.subject}',
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor: Colors.green,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            margin: const EdgeInsets.all(16),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                  child: const Text(
+                                    'Save',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ],
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  side: BorderSide(color: Colors.grey.shade300),
-                                ),
-                                child: const Text('Cancel', style: TextStyle(fontSize: 16)),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: FilledButton(
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Colors.deepOrange,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  elevation: 2,
-                                ),
-                                onPressed: () async {
-                                  if (formKey.currentState!.validate()) {
-                                    final startTimeString =
-                                        '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
-                                    final endTimeString =
-                                        '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
-
-                                    final timetableEntry = Timetable(
-                                      id: edit?.id,
-                                      subject: subjectCtrl.text.trim(),
-                                      dayOfWeek: selectedDayValue,
-                                      startTime: startTimeString,
-                                      endTime: endTimeString,
-                                      classroom: classroomCtrl.text.trim().isEmpty ? null : classroomCtrl.text.trim(),
-                                      notificationsEnabled: notificationsEnabled,
-                                      notificationMinutesBefore: notificationMinutes,
-                                    );
-
-                                    if (edit == null) {
-                                      await db.insertTimetable(timetableEntry);
-                                    } else {
-                                      await db.updateTimetable(timetableEntry);
-                                    }
-
-                                    Navigator.pop(context);
-                                    await _loadTimetable();
-                                    await _rescheduleNotifications();
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            const Icon(Icons.check_circle, color: Colors.white),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                  '${edit == null ? 'Added' : 'Updated'} ${timetableEntry.subject}'),
-                                            ),
-                                          ],
-                                        ),
-                                        backgroundColor: Colors.green,
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        margin: const EdgeInsets.all(16),
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: const Text(
-                                  'Save',
-                                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -391,18 +439,24 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             SizedBox(width: 12),
-            Text('Delete Class?', style: TextStyle(color: Colors.red)),
+            Flexible(
+              child: Text(
+                'Delete Class?',
+                style: TextStyle(color: Colors.red),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text(
           'Are you sure you want to delete ${t.subject} on ${t.dayOfWeek}? This action cannot be undone.',
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 15),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context, false),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Cancel'),
@@ -410,7 +464,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
@@ -424,21 +478,28 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
       await db.deleteTimetable(t.id!);
       await notifications.cancelNotification(t.id!);
       await _loadTimetable();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(child: Text('Deleted ${t.subject}')),
-            ],
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Deleted ${t.subject}',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -488,10 +549,10 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
           onPressed: () => _showAddTimetableDialog(),
           backgroundColor: Colors.deepOrange,
           foregroundColor: Colors.white,
-          icon: const Icon(Icons.add, size: 24),
+          icon: const Icon(Icons.add, size: 22),
           label: const Text(
             'Add Class',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           elevation: 6,
         ),
@@ -517,12 +578,11 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Column(
@@ -531,72 +591,78 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                         const Text(
                           'Timetable',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             letterSpacing: 0.5,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Manage your class schedule and get reminders',
+                          'Manage your class schedule',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 13,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  _buildHeaderIconButton(
-                    icon: Icons.refresh,
-                    onPressed: _loadTimetable,
-                    tooltip: 'Refresh',
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      onPressed: _loadTimetable,
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                      tooltip: 'Refresh',
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search by subject or classroom...',
+                    hintText: 'Search classes...',
                     hintStyle: TextStyle(color: Colors.grey.shade400),
                     prefixIcon: Icon(Icons.search, color: Colors.deepOrange.shade400),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
                       icon: const Icon(Icons.clear, color: Colors.grey),
-                      onPressed: () {
-                        _searchController.clear();
-                      },
+                      onPressed: () => _searchController.clear(),
                     )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: daysOfWeek.map((day) {
                     final isSelected = day == selectedDay;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.only(right: 8),
                       child: FilterChip(
-                        label: Text(day),
+                        label: Text(day.substring(0, 3)),
                         selected: isSelected,
                         onSelected: (_) => setState(() => selectedDay = day),
                         backgroundColor: Colors.grey.shade200,
@@ -604,9 +670,10 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                         labelStyle: TextStyle(
                           color: isSelected ? Colors.white : Colors.black87,
                           fontWeight: FontWeight.w500,
+                          fontSize: 13,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     );
@@ -620,59 +687,43 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildHeaderIconButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    required String tooltip,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
-        tooltip: tooltip,
-      ),
-    );
-  }
-
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.deepOrange.shade50,
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.deepOrange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                _searchController.text.isEmpty ? Icons.schedule : Icons.search_off,
+                size: 32,
+                color: Colors.deepOrange.shade300,
+              ),
             ),
-            child: Icon(
-              _searchController.text.isEmpty ? Icons.schedule : Icons.search_off,
-              size: 32,
-              color: Colors.deepOrange.shade300,
+            const SizedBox(height: 12),
+            Text(
+              _searchController.text.isEmpty ? 'No Classes Scheduled' : 'No Results Found',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _searchController.text.isEmpty ? 'No Classes Scheduled' : 'No Results Found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+            const SizedBox(height: 8),
+            Text(
+              'Selected day: $selectedDay',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Selected day: $selectedDay',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -713,8 +764,8 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                     Hero(
                       tag: 'avatar_${entry.id}',
                       child: Container(
-                        width: 56,
-                        height: 56,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -728,21 +779,21 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                           boxShadow: [
                             BoxShadow(
                               color: Colors.deepOrange.withOpacity(0.3),
-                              blurRadius: 8,
+                              blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Icon(
                             Icons.school,
                             color: Colors.white,
-                            size: 24,
+                            size: 22,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -751,11 +802,14 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                             entry.subject,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
-                          Row(
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -766,14 +820,13 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                 child: Text(
                                   entry.displayTime,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     color: Colors.deepOrange.shade700,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              if (entry.classroom != null && entry.classroom!.isNotEmpty) ...[
-                                const SizedBox(width: 8),
+                              if (entry.classroom != null && entry.classroom!.isNotEmpty)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
@@ -781,34 +834,33 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    'Room: ${entry.classroom}',
+                                    entry.classroom!,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: Colors.grey.shade700,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              if (entry.notificationsEnabled)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    '🔔 ${entry.notificationMinutesBefore}min',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.green.shade700,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
-                              ],
                             ],
                           ),
-                          if (entry.notificationsEnabled)
-                            Container(
-                              margin: const EdgeInsets.only(top: 4),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '🔔 ${entry.notificationMinutesBefore}min before',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.green.shade700,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
@@ -817,24 +869,27 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                       children: [
                         IconButton(
                           onPressed: () => _showAddTimetableDialog(edit: entry),
-                          icon: const Icon(Icons.edit_outlined, size: 22),
+                          icon: const Icon(Icons.edit_outlined, size: 20),
                           color: Colors.blue,
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            padding: const EdgeInsets.all(8),
                           ),
                         ),
+                        const SizedBox(width: 4),
                         IconButton(
                           onPressed: () => _confirmDelete(entry),
-                          icon: const Icon(Icons.delete_outline, size: 22),
+                          icon: const Icon(Icons.delete_outline, size: 20),
                           color: Colors.red,
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.red.shade50,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            padding: const EdgeInsets.all(8),
                           ),
                         ),
                       ],
@@ -856,65 +911,67 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.deepOrange,
-                        Colors.deepOrange.withOpacity(0.7),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'avatar_${entry.id}',
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        entry.subject,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.deepOrange,
+                      Colors.deepOrange.withOpacity(0.7),
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Hero(
+                      tag: 'avatar_${entry.id}',
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      entry.subject,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
                       _buildDetailRow('Day:', entry.dayOfWeek, Icons.calendar_today),
@@ -930,20 +987,20 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                         width: double.infinity,
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Close', style: TextStyle(fontSize: 16)),
+                          child: const Text('Close', style: TextStyle(fontSize: 15)),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -953,7 +1010,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
   Widget _buildDetailRow(String label, String value, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -967,7 +1024,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
               color: Colors.deepOrange.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.deepOrange, size: 20),
+            child: Icon(icon, color: Colors.deepOrange, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -977,7 +1034,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
                   ),
@@ -986,9 +1043,11 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ],
             ),

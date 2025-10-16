@@ -83,21 +83,22 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
 
     await showDialog(
       context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (context, dialogSetState) => Dialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 16,
-          child: ConstrainedBox(
+          child: Container(
             constraints: BoxConstraints(
-              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Header
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.teal.shade600, Colors.green.shade600],
@@ -112,7 +113,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -120,17 +121,17 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                         child: const Icon(
                           Icons.add,
                           color: Colors.white,
-                          size: 28,
+                          size: 24,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       const Expanded(
                         child: Text(
                           'Create Session',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 20,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -138,37 +139,38 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                     ],
                   ),
                 ),
-                Expanded(
+                // Form Content
+                Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     child: Form(
                       key: formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              controller: titleCtrl,
-                              decoration: InputDecoration(
-                                labelText: 'Session Title *',
-                                prefixIcon: const Icon(Icons.title, color: Colors.teal),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          // Title Field
+                          TextFormField(
+                            controller: titleCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Session Title *',
+                              prefixIcon: const Icon(Icons.title, color: Colors.teal),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter a session title';
-                                }
-                                return null;
-                              },
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter a session title';
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 16),
-                          GestureDetector(
+
+                          // Date Picker
+                          InkWell(
                             onTap: () async {
                               final picked = await showDatePicker(
                                 context: context,
@@ -177,30 +179,45 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                                 lastDate: DateTime(2100),
                               );
                               if (picked != null) {
-                                dialogSetState(() => chosenDate = picked);
+                                setDialogState(() => chosenDate = picked);
                               }
                             },
                             child: Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey.shade300),
                                 borderRadius: BorderRadius.circular(12),
+                                color: Colors.grey.shade50,
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.calendar_today, color: Colors.teal),
+                                  const Icon(Icons.calendar_today, color: Colors.teal, size: 20),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: Text(
-                                      DateFormat('MMMM dd, yyyy').format(chosenDate),
-                                      style: const TextStyle(fontSize: 16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Session Date',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          DateFormat('MMMM dd, yyyy').format(chosenDate),
+                                          style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  FilledButton(
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: Colors.teal,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                    ),
+                                  const SizedBox(width: 8),
+                                  TextButton(
                                     onPressed: () async {
                                       final picked = await showDatePicker(
                                         context: context,
@@ -209,46 +226,57 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                                         lastDate: DateTime(2100),
                                       );
                                       if (picked != null) {
-                                        dialogSetState(() => chosenDate = picked);
+                                        setDialogState(() => chosenDate = picked);
                                       }
                                     },
-                                    child: const Text('Change'),
+                                    style: TextButton.styleFrom(
+                                      backgroundColor: Colors.teal.shade50,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                    child: const Text(
+                                      'Change',
+                                      style: TextStyle(fontSize: 13),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
                           const SizedBox(height: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              controller: notesCtrl,
-                              decoration: InputDecoration(
-                                labelText: 'Session Notes',
-                                prefixIcon: const Icon(Icons.notes, color: Colors.teal),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+
+                          // Notes Field
+                          TextFormField(
+                            controller: notesCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Session Notes (Optional)',
+                              prefixIcon: const Icon(Icons.notes, color: Colors.teal),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              maxLines: 4,
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
+                              alignLabelWithHint: true,
                             ),
+                            maxLines: 4,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
+
+                          // Action Buttons
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () => Navigator.pop(context),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    side: BorderSide(color: Colors.grey.shade300),
                                   ),
-                                  child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+                                  child: const Text('Cancel'),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -256,11 +284,10 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                                 child: FilledButton(
                                   style: FilledButton.styleFrom(
                                     backgroundColor: Colors.teal,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    elevation: 2,
                                   ),
                                   onPressed: () async {
                                     if (formKey.currentState!.validate()) {
@@ -272,28 +299,40 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                                       await db.insertSession(session);
                                       Navigator.pop(context);
                                       await _load();
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            children: [
-                                              const Icon(Icons.check_circle, color: Colors.white),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Text('Created session "${session.title}"'),
-                                              ),
-                                            ],
+
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(this.context).showSnackBar(
+                                          SnackBar(
+                                            content: Row(
+                                              children: [
+                                                const Icon(Icons.check_circle, color: Colors.white),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    'Created "${session.title}"',
+                                                    overflow: TextOverflow.ellipsis,
+                                                    maxLines: 2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            backgroundColor: Colors.green,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            margin: const EdgeInsets.all(16),
                                           ),
-                                          backgroundColor: Colors.green,
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          margin: const EdgeInsets.all(16),
-                                        ),
-                                      );
+                                        );
+                                      }
                                     }
                                   },
                                   child: const Text(
-                                    'Save Session',
-                                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -321,18 +360,24 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             SizedBox(width: 12),
-            Text('Delete Session?', style: TextStyle(color: Colors.red)),
+            Flexible(
+              child: Text(
+                'Delete Session?',
+                style: TextStyle(color: Colors.red),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text(
           'Are you sure you want to delete "${s.title}"? This action cannot be undone.',
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 15),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context, false),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Cancel'),
@@ -340,7 +385,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
@@ -353,21 +398,29 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
     if (ok == true) {
       await db.deleteSession(s.id!);
       await _load();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(child: Text('Deleted session "${s.title}"')),
-            ],
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Deleted "${s.title}"',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
           ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -415,10 +468,10 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
           onPressed: () => _showAddSession(),
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
-          icon: const Icon(Icons.add, size: 24),
+          icon: const Icon(Icons.add, size: 22),
           label: const Text(
             'New Session',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           elevation: 6,
         ),
@@ -444,46 +497,46 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Sessions',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             letterSpacing: 0.5,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Manage your teaching sessions',
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Manage teaching sessions',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 13,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  Wrap(
+                    spacing: 6,
                     children: [
                       _buildHeaderIconButton(
                         icon: _isGridView ? Icons.list : Icons.grid_view,
                         onPressed: () => setState(() => _isGridView = !_isGridView),
                         tooltip: _isGridView ? 'List View' : 'Grid View',
                       ),
-                      const SizedBox(width: 6),
                       _buildHeaderIconButton(
                         icon: Icons.refresh,
                         onPressed: _load,
@@ -493,42 +546,40 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search by title, date, or notes...',
+                    hintText: 'Search sessions...',
                     hintStyle: TextStyle(color: Colors.grey.shade400),
                     prefixIcon: Icon(Icons.search, color: Colors.teal.shade400),
                     suffixIcon: searchController.text.isNotEmpty
                         ? IconButton(
                       icon: const Icon(Icons.clear, color: Colors.grey),
-                      onPressed: () {
-                        searchController.clear();
-                      },
+                      onPressed: () => searchController.clear(),
                     )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const Spacer(),
                   _buildSortButton(),
                 ],
               ),
@@ -547,12 +598,14 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
+        icon: Icon(icon, color: Colors.white, size: 20),
         tooltip: tooltip,
+        padding: const EdgeInsets.all(8),
+        constraints: const BoxConstraints(),
       ),
     );
   }
@@ -560,12 +613,12 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
   Widget _buildSortButton() {
     return PopupMenuButton<String>(
       icon: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.sort, color: Colors.white),
+        child: const Icon(Icons.sort, color: Colors.white, size: 20),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
@@ -574,43 +627,58 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
           _sortSessions();
         });
       },
-      itemBuilder: (_) => [
-        const PopupMenuItem(value: 'title', child: Text('Sort by Title')),
-        const PopupMenuItem(value: 'date', child: Text('Sort by Date')),
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'title', child: Text('Sort by Title')),
+        PopupMenuItem(value: 'date', child: Text('Sort by Date')),
       ],
     );
   }
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.teal.shade50,
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.teal.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                searchController.text.isEmpty ? Icons.book_outlined : Icons.search_off,
+                size: 70,
+                color: Colors.teal.shade300,
+              ),
             ),
-            child: Icon(
-              searchController.text.isEmpty ? Icons.book_outlined : Icons.search_off,
-              size: 32,
-              color: Colors.teal.shade300,
+            const SizedBox(height: 20),
+            Text(
+              searchController.text.isEmpty ? 'No Sessions Yet' : 'No Results Found',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            searchController.text.isEmpty ? 'No Sessions Yet' : 'No Results Found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Text(
+                searchController.text.isEmpty
+                    ? 'Start tracking your teaching sessions'
+                    : 'Try adjusting your search terms',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade500,
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -621,7 +689,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.78,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -644,100 +712,102 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
     return Card(
       elevation: 3,
       shadowColor: Colors.teal.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: () => _showSessionDetails(session),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                children: [
-                  Hero(
-                    tag: 'avatar_${session.id}',
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            avatarColor,
-                            avatarColor.withOpacity(0.7),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Hero(
+                      tag: 'avatar_${session.id}',
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              avatarColor,
+                              avatarColor.withOpacity(0.7),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: avatarColor.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
                         ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: avatarColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          avatarText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                        child: Center(
+                          child: Text(
+                            avatarText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    session.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.teal.shade50,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      dateStr,
-                      style: TextStyle(
-                        color: Colors.teal.shade700,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: Text(
+                        session.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.teal.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        dateStr,
+                        style: TextStyle(
+                          color: Colors.teal.shade700,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    onPressed: () => _confirmDelete(session),
-                    icon: const Icon(Icons.delete, size: 18),
-                    color: Colors.red,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.red.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+              const SizedBox(height: 4),
+              IconButton(
+                onPressed: () => _confirmDelete(session),
+                icon: const Icon(Icons.delete, size: 16),
+                color: Colors.red,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.red.shade50,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
+                ),
               ),
             ],
           ),
@@ -786,8 +856,8 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                     Hero(
                       tag: 'avatar_${session.id}',
                       child: Container(
-                        width: 56,
-                        height: 56,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -801,7 +871,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                           boxShadow: [
                             BoxShadow(
                               color: avatarColor.withOpacity(0.3),
-                              blurRadius: 8,
+                              blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -812,13 +882,13 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                              fontSize: 18,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,11 +897,14 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                             session.title,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
-                          Row(
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -842,14 +915,14 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                                 child: Text(
                                   dateStr,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     color: Colors.teal.shade700,
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (session.notes != null && session.notes!.isNotEmpty) ...[
-                                const SizedBox(width: 8),
+                              if (session.notes != null && session.notes!.isNotEmpty)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
@@ -857,17 +930,17 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    session.notes!.length > 20
-                                        ? '${session.notes!.substring(0, 20)}...'
+                                    session.notes!.length > 15
+                                        ? '${session.notes!.substring(0, 15)}...'
                                         : session.notes!,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: Colors.grey.shade700,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              ],
                             ],
                           ),
                         ],
@@ -875,13 +948,14 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                     ),
                     IconButton(
                       onPressed: () => _confirmDelete(session),
-                      icon: const Icon(Icons.delete_outline, size: 22),
+                      icon: const Icon(Icons.delete_outline, size: 20),
                       color: Colors.red,
                       style: IconButton.styleFrom(
                         backgroundColor: Colors.red.shade50,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        padding: const EdgeInsets.all(8),
                       ),
                     ),
                   ],
@@ -907,68 +981,70 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        avatarColor,
-                        avatarColor.withOpacity(0.7),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      avatarColor,
+                      avatarColor.withOpacity(0.7),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'avatar_${session.id}',
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              avatarText,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 32,
-                              ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Hero(
+                      tag: 'avatar_${session.id}',
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            avatarText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        session.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      session.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.white,
                       ),
-                    ],
-                  ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
                       _buildDetailRow('Title:', session.title, Icons.title),
@@ -980,20 +1056,20 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                         width: double.infinity,
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Close', style: TextStyle(fontSize: 16)),
+                          child: const Text('Close', style: TextStyle(fontSize: 15)),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1003,7 +1079,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
   Widget _buildDetailRow(String label, String value, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -1017,7 +1093,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
               color: Colors.teal.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.teal, size: 20),
+            child: Icon(icon, color: Colors.teal, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1027,7 +1103,7 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1036,9 +1112,11 @@ class _SessionScreenState extends State<SessionScreen> with TickerProviderStateM
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: label == 'Notes:' ? 10 : 2,
                 ),
               ],
             ),

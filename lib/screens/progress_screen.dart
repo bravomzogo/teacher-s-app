@@ -81,7 +81,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         progressEntries.sort((a, b) {
           final scoreA = a['score'] as num? ?? 0;
           final scoreB = b['score'] as num? ?? 0;
-          return scoreB.compareTo(scoreA); // Descending
+          return scoreB.compareTo(scoreA);
         });
         break;
     }
@@ -101,9 +101,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
 
   Future<void> _openAddProgressDialog() async {
     if (selectedSessionId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please create or select a session first')),
-      );
+      _showErrorSnackbar('Please create or select a session first');
       return;
     }
 
@@ -114,24 +112,24 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
 
     await showDialog(
       context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (context, dialogSetState) => Dialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 16,
-          child: ConstrainedBox(
+          child: Container(
             constraints: BoxConstraints(
-              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.orange.shade600, Colors.red.shade600],
+                      colors: [Colors.orange.shade600, Colors.amber.shade400],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -143,7 +141,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -151,17 +149,17 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         child: const Icon(
                           Icons.assignment_add,
                           color: Colors.white,
-                          size: 28,
+                          size: 24,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       const Expanded(
                         child: Text(
                           'Record Progress',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 20,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -169,90 +167,80 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                     ],
                   ),
                 ),
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     child: Form(
                       key: formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: DropdownButtonFormField<int>(
-                              value: chosenStudentId,
-                              decoration: InputDecoration(
-                                labelText: 'Select Student *',
-                                prefixIcon: const Icon(Icons.person, color: Colors.orange),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          DropdownButtonFormField<int>(
+                            value: chosenStudentId,
+                            decoration: InputDecoration(
+                              labelText: 'Select Student *',
+                              prefixIcon: const Icon(Icons.person, color: Colors.orange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              items: students.map((student) {
-                                return DropdownMenuItem(
-                                  value: student.id,
-                                  child: Text(student.fullName),
-                                );
-                              }).toList(),
-                              onChanged: (value) => dialogSetState(() => chosenStudentId = value),
-                              validator: (value) {
-                                if (value == null) {
-                                  return 'Please select a student';
-                                }
-                                return null;
-                              },
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
+                            items: students.map((student) {
+                              return DropdownMenuItem(
+                                value: student.id,
+                                child: Text(student.fullName),
+                              );
+                            }).toList(),
+                            onChanged: (value) => setDialogState(() => chosenStudentId = value),
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Please select a student';
+                              }
+                              return null;
+                            },
                           ),
-                          const SizedBox(height: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Score',
-                                prefixIcon: const Icon(Icons.score, color: Colors.orange),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          const SizedBox(height: 14),
+                          TextFormField(
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Score',
+                              prefixIcon: const Icon(Icons.score, color: Colors.orange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              onChanged: (value) => dialogSetState(() => score = double.tryParse(value)),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
+                            onChanged: (value) => setDialogState(() => score = double.tryParse(value)),
                           ),
-                          const SizedBox(height: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              controller: remarksCtrl,
-                              decoration: InputDecoration(
-                                labelText: 'Remarks',
-                                prefixIcon: const Icon(Icons.comment, color: Colors.orange),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          const SizedBox(height: 14),
+                          TextFormField(
+                            controller: remarksCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Remarks',
+                              prefixIcon: const Icon(Icons.comment, color: Colors.orange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              maxLines: 4,
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
+                            maxLines: 4,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () => Navigator.pop(context),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    side: BorderSide(color: Colors.grey.shade300),
                                   ),
-                                  child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+                                  child: const Text('Cancel'),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -260,11 +248,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                 child: FilledButton(
                                   style: FilledButton.styleFrom(
                                     backgroundColor: Colors.orange,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    elevation: 2,
                                   ),
                                   onPressed: () async {
                                     if (formKey.currentState!.validate()) {
@@ -276,28 +263,15 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                       ));
                                       Navigator.pop(context);
                                       await _loadProgress();
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            children: [
-                                              const Icon(Icons.check_circle, color: Colors.white),
-                                              const SizedBox(width: 12),
-                                              const Expanded(
-                                                child: Text('Progress recorded successfully'),
-                                              ),
-                                            ],
-                                          ),
-                                          backgroundColor: Colors.green,
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                          margin: const EdgeInsets.all(16),
-                                        ),
-                                      );
+                                      _showSuccessSnackbar('Progress recorded successfully', Icons.check_circle);
                                     }
                                   },
                                   child: const Text(
                                     'Save',
-                                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -323,24 +297,24 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
 
     await showDialog(
       context: context,
-      builder: (_) => StatefulBuilder(
-        builder: (context, dialogSetState) => Dialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 16,
-          child: ConstrainedBox(
+          child: Container(
             constraints: BoxConstraints(
-              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+              maxHeight: MediaQuery.of(context).size.height * 0.85,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.orange.shade600, Colors.red.shade600],
+                      colors: [Colors.orange.shade600, Colors.amber.shade400],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -352,7 +326,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
@@ -360,17 +334,17 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         child: const Icon(
                           Icons.edit,
                           color: Colors.white,
-                          size: 28,
+                          size: 24,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Edit Progress for $studentName',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 22,
+                            fontSize: 20,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -378,62 +352,55 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                     ],
                   ),
                 ),
-                Expanded(
+                Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     child: Form(
                       key: formKey,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              initialValue: score?.toString(),
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: 'Score',
-                                prefixIcon: const Icon(Icons.score, color: Colors.orange),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          TextFormField(
+                            initialValue: score?.toString(),
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: 'Score',
+                              prefixIcon: const Icon(Icons.score, color: Colors.orange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              onChanged: (value) => dialogSetState(() => score = double.tryParse(value)),
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
+                            onChanged: (value) => setDialogState(() => score = double.tryParse(value)),
                           ),
-                          const SizedBox(height: 16),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: TextFormField(
-                              controller: remarksCtrl,
-                              decoration: InputDecoration(
-                                labelText: 'Remarks',
-                                prefixIcon: const Icon(Icons.comment, color: Colors.orange),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          const SizedBox(height: 14),
+                          TextFormField(
+                            controller: remarksCtrl,
+                            decoration: InputDecoration(
+                              labelText: 'Remarks',
+                              prefixIcon: const Icon(Icons.comment, color: Colors.orange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              maxLines: 4,
+                              filled: true,
+                              fillColor: Colors.grey.shade50,
                             ),
+                            maxLines: 4,
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                           Row(
                             children: [
                               Expanded(
                                 child: OutlinedButton(
                                   onPressed: () => Navigator.pop(context),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    side: BorderSide(color: Colors.grey.shade300),
                                   ),
-                                  child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+                                  child: const Text('Cancel'),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -441,11 +408,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                 child: FilledButton(
                                   style: FilledButton.styleFrom(
                                     backgroundColor: Colors.orange,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    elevation: 2,
                                   ),
                                   onPressed: () async {
                                     await db.updateProgress(Progress(
@@ -457,27 +423,14 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                     ));
                                     Navigator.pop(context);
                                     await _loadProgress();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Row(
-                                          children: [
-                                            const Icon(Icons.check_circle, color: Colors.white),
-                                            const SizedBox(width: 12),
-                                            const Expanded(
-                                              child: Text('Progress updated successfully'),
-                                            ),
-                                          ],
-                                        ),
-                                        backgroundColor: Colors.green,
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        margin: const EdgeInsets.all(16),
-                                      ),
-                                    );
+                                    _showSuccessSnackbar('Progress updated successfully', Icons.check_circle);
                                   },
                                   child: const Text(
                                     'Save',
-                                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -510,13 +463,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         ),
         content: const Text(
           'Are you sure you want to delete this progress record? This action cannot be undone.',
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 15),
         ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.pop(context, false),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Cancel'),
@@ -524,7 +477,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
@@ -537,22 +490,56 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
     if (ok == true) {
       await db.deleteProgress(id);
       await _loadProgress();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white),
-              const SizedBox(width: 12),
-              const Expanded(child: Text('Progress record deleted')),
-            ],
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.all(16),
-        ),
-      );
+      _showErrorSnackbar('Progress record deleted');
     }
+  }
+
+  void _showSuccessSnackbar(String message, IconData icon) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
   }
 
   @override
@@ -600,12 +587,12 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         ),
         child: FloatingActionButton.extended(
           onPressed: _openAddProgressDialog,
-          backgroundColor: Colors.orange,
+          backgroundColor: Colors.amber.shade600,
           foregroundColor: Colors.white,
-          icon: const Icon(Icons.assignment_add, size: 24),
+          icon: const Icon(Icons.assignment_add, size: 22),
           label: const Text(
             'Record Progress',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
           elevation: 6,
         ),
@@ -618,7 +605,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.orange.shade700, Colors.red.shade500],
+          colors: [Colors.orange.shade700, Colors.amber.shade500],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -632,12 +619,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Column(
@@ -646,32 +632,33 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         const Text(
                           'Progress Tracking',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 26,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             letterSpacing: 0.5,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         const Text(
-                          'Track and manage student progress across sessions',
+                          'Track and manage student progress',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 13,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  Wrap(
+                    spacing: 6,
                     children: [
                       _buildHeaderIconButton(
                         icon: _isGridView ? Icons.list : Icons.grid_view,
                         onPressed: () => setState(() => _isGridView = !_isGridView),
                         tooltip: _isGridView ? 'List View' : 'Grid View',
                       ),
-                      const SizedBox(width: 6),
                       _buildHeaderIconButton(
                         icon: Icons.refresh,
                         onPressed: _loadAll,
@@ -681,16 +668,16 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
@@ -703,29 +690,27 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                     suffixIcon: searchController.text.isNotEmpty
                         ? IconButton(
                       icon: const Icon(Icons.clear, color: Colors.grey),
-                      onPressed: () {
-                        searchController.clear();
-                      },
+                      onPressed: () => searchController.clear(),
                     )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(14),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -735,7 +720,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                           labelText: 'Select Session',
                           prefixIcon: const Icon(Icons.book, color: Colors.orange),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         ),
                         items: sessions.map((session) {
                           return DropdownMenuItem(
@@ -750,7 +735,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   _buildSortButton(),
                 ],
               ),
@@ -769,12 +754,14 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
+        icon: Icon(icon, color: Colors.white, size: 20),
         tooltip: tooltip,
+        padding: const EdgeInsets.all(8),
+        constraints: const BoxConstraints(),
       ),
     );
   }
@@ -782,12 +769,12 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
   Widget _buildSortButton() {
     return PopupMenuButton<String>(
       icon: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.sort, color: Colors.white),
+        child: const Icon(Icons.sort, color: Colors.white, size: 20),
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: (value) {
@@ -796,77 +783,121 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
           _sortProgress();
         });
       },
-      itemBuilder: (_) => [
-        const PopupMenuItem(value: 'name', child: Text('Sort by Name')),
-        const PopupMenuItem(value: 'score', child: Text('Sort by Score')),
+      itemBuilder: (_) => const [
+        PopupMenuItem(value: 'name', child: Text('Sort by Name')),
+        PopupMenuItem(value: 'score', child: Text('Sort by Score')),
       ],
     );
   }
 
   Widget _buildEmptySessionsState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.assignment_outlined,
+                size: 70,
+                color: Colors.orange.shade300,
+              ),
             ),
-            child: Icon(
-              Icons.assignment_outlined,
-              size: 32,
-              color: Colors.orange.shade300,
+            const SizedBox(height: 20),
+            Text(
+              'No Sessions Available',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'No Sessions Available',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+            const SizedBox(height: 10),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30),
+              child: Text(
+                'Create a session first to start tracking progress',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildEmptyProgressState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              shape: BoxShape.circle,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                searchController.text.isEmpty ? Icons.analytics_outlined : Icons.search_off,
+                size: 70,
+                color: Colors.orange.shade300,
+              ),
             ),
-            child: Icon(
-              searchController.text.isEmpty ? Icons.analytics_outlined : Icons.search_off,
-              size: 32,
-              color: Colors.orange.shade300,
+            const SizedBox(height: 20),
+            Text(
+              searchController.text.isEmpty ? 'No Progress Records' : 'No Results Found',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade700,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            searchController.text.isEmpty ? 'No Progress Records' : 'No Results Found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Text(
+                searchController.text.isEmpty
+                    ? 'Start recording progress for your students'
+                    : 'Try adjusting your search terms',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade500,
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+            if (searchController.text.isEmpty) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _openAddProgressDialog,
+                icon: const Icon(Icons.add),
+                label: const Text('Record First Progress'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -877,7 +908,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.78,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -904,115 +935,127 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
     return Card(
       elevation: 3,
       shadowColor: Colors.orange.withOpacity(0.2),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: () => _showProgressDetails(entry),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Column(
-                children: [
-                  Hero(
-                    tag: 'avatar_$progressId',
-                    child: Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            avatarColor,
-                            avatarColor.withOpacity(0.7),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Hero(
+                      tag: 'avatar_$progressId',
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              avatarColor,
+                              avatarColor.withOpacity(0.7),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: avatarColor.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
                         ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: avatarColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          avatarText,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                        child: Center(
+                          child: Text(
+                            avatarText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    fullName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      score != null ? score.toString() : 'No score',
-                      style: TextStyle(
-                        color: Colors.orange.shade700,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: Text(
+                        fullName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        score != null ? 'Score: $score' : 'No score',
+                        style: TextStyle(
+                          color: Colors.orange.shade700,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: 4),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
-                    onPressed: () => _editProgress(
-                      progressId,
-                      studentId,
-                      fullName,
-                      score != null ? (score as num).toDouble() : null,
-                      remarks,
-                    ),
-                    icon: const Icon(Icons.edit, size: 18),
-                    color: Colors.blue,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.blue.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  Flexible(
+                    child: IconButton(
+                      onPressed: () => _editProgress(
+                        progressId,
+                        studentId,
+                        fullName,
+                        score != null ? (score as num).toDouble() : null,
+                        remarks,
+                      ),
+                      icon: const Icon(Icons.edit, size: 16),
+                      color: Colors.blue,
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.blue.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => _confirmDelete(progressId),
-                    icon: const Icon(Icons.delete, size: 18),
-                    color: Colors.red,
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.red.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: IconButton(
+                      onPressed: () => _confirmDelete(progressId),
+                      icon: const Icon(Icons.delete, size: 16),
+                      color: Colors.red,
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.red.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
@@ -1069,8 +1112,8 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                     Hero(
                       tag: 'avatar_$progressId',
                       child: Container(
-                        width: 56,
-                        height: 56,
+                        width: 52,
+                        height: 52,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -1084,7 +1127,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                           boxShadow: [
                             BoxShadow(
                               color: avatarColor.withOpacity(0.3),
-                              blurRadius: 8,
+                              blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -1095,13 +1138,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                              fontSize: 18,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1110,11 +1153,14 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             fullName,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
-                          Row(
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1125,14 +1171,14 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                 child: Text(
                                   score != null ? 'Score: $score' : 'No score',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     color: Colors.orange.shade700,
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (remarks.isNotEmpty) ...[
-                                const SizedBox(width: 8),
+                              if (remarks.isNotEmpty)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
@@ -1142,13 +1188,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                   child: Text(
                                     remarks.length > 20 ? '${remarks.substring(0, 20)}...' : remarks,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       color: Colors.grey.shade700,
                                       fontWeight: FontWeight.w600,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                              ],
                             ],
                           ),
                         ],
@@ -1165,24 +1211,27 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             score != null ? (score as num).toDouble() : null,
                             remarks,
                           ),
-                          icon: const Icon(Icons.edit_outlined, size: 22),
+                          icon: const Icon(Icons.edit_outlined, size: 20),
                           color: Colors.blue,
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.blue.shade50,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            padding: const EdgeInsets.all(8),
                           ),
                         ),
+                        const SizedBox(width: 4),
                         IconButton(
                           onPressed: () => _confirmDelete(progressId),
-                          icon: const Icon(Icons.delete_outline, size: 22),
+                          icon: const Icon(Icons.delete_outline, size: 20),
                           color: Colors.red,
                           style: IconButton.styleFrom(
                             backgroundColor: Colors.red.shade50,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
+                            padding: const EdgeInsets.all(8),
                           ),
                         ),
                       ],
@@ -1213,68 +1262,70 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 600),
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
+            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+            maxHeight: MediaQuery.of(context).size.height * 0.75,
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        avatarColor,
-                        avatarColor.withOpacity(0.7),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      avatarColor,
+                      avatarColor.withOpacity(0.7),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: Column(
-                    children: [
-                      Hero(
-                        tag: 'avatar_$progressId',
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              avatarText,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 32,
-                              ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Hero(
+                      tag: 'avatar_$progressId',
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            avatarText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        fullName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      fullName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Colors.white,
                       ),
-                    ],
-                  ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(24),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
                       _buildDetailRow('Score:', score?.toString() ?? 'Not set', Icons.score),
@@ -1284,20 +1335,20 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         width: double.infinity,
                         child: FilledButton(
                           style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Close', style: TextStyle(fontSize: 16)),
+                          child: const Text('Close', style: TextStyle(fontSize: 15)),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1307,7 +1358,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
   Widget _buildDetailRow(String label, String value, IconData icon) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -1321,7 +1372,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
               color: Colors.orange.shade50,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.orange, size: 20),
+            child: Icon(icon, color: Colors.orange, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1331,7 +1382,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     color: Colors.grey.shade600,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1340,9 +1391,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ],
             ),
