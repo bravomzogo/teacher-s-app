@@ -188,7 +188,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                           ),
                           const SizedBox(height: 16),
 
-                          // Time Pickers
+                          // Time Pickers - UPDATED: dialOnly to remove keyboard switch button
                           Row(
                             children: [
                               Expanded(
@@ -197,6 +197,21 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                     final time = await showTimePicker(
                                       context: context,
                                       initialTime: startTime,
+                                      builder: (BuildContext context, Widget? child) {
+                                        return Theme(
+                                          data: ThemeData.light().copyWith(
+                                            colorScheme: const ColorScheme.light(
+                                              primary: Colors.deepOrange,
+                                              onPrimary: Colors.white,
+                                              surface: Colors.white,
+                                              onSurface: Colors.black,
+                                            ),
+                                            dialogBackgroundColor: Colors.white,
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                      initialEntryMode: TimePickerEntryMode.dialOnly, // Force dial mode only
                                     );
                                     if (time != null) {
                                       setDialogState(() => startTime = time);
@@ -227,6 +242,21 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                     final time = await showTimePicker(
                                       context: context,
                                       initialTime: endTime,
+                                      builder: (BuildContext context, Widget? child) {
+                                        return Theme(
+                                          data: ThemeData.light().copyWith(
+                                            colorScheme: const ColorScheme.light(
+                                              primary: Colors.deepOrange,
+                                              onPrimary: Colors.white,
+                                              surface: Colors.white,
+                                              onSurface: Colors.black,
+                                            ),
+                                            dialogBackgroundColor: Colors.white,
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                      initialEntryMode: TimePickerEntryMode.dialOnly, // Force dial mode only
                                     );
                                     if (time != null) {
                                       setDialogState(() => endTime = time);
@@ -289,24 +319,40 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: Colors.orange.shade200),
                               ),
-                              child: Row(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(Icons.alarm, color: Colors.deepOrange, size: 20),
-                                  const SizedBox(width: 8),
-                                  const Text('Notify me', style: TextStyle(fontSize: 14)),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: DropdownButton<int>(
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.alarm, color: Colors.deepOrange, size: 20),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Notification Time',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: DropdownButtonFormField<int>(
                                       value: notificationMinutes,
-                                      isExpanded: true,
-                                      underline: const SizedBox(),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                      ),
                                       items: [5, 10, 15, 30, 60].map((minutes) {
                                         return DropdownMenuItem(
                                           value: minutes,
-                                          child: Text(
-                                            '$minutes min before',
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                          child: Text('$minutes minutes before'),
                                         );
                                       }).toList(),
                                       onChanged: (value) {
