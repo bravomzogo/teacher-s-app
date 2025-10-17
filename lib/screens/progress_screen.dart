@@ -458,7 +458,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             SizedBox(width: 12),
-            Text('Delete Progress?', style: TextStyle(color: Colors.red)),
+            Expanded(
+              child: Text(
+                'Delete Progress?',
+                style: TextStyle(color: Colors.red),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: const Text(
