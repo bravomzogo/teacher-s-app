@@ -179,6 +179,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         children: [
                           DropdownButtonFormField<int>(
                             value: chosenStudentId,
+                            isExpanded: true,
                             decoration: InputDecoration(
                               labelText: 'Select Student *',
                               prefixIcon: const Icon(Icons.person, color: Colors.orange),
@@ -191,9 +192,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             items: students.map((student) {
                               return DropdownMenuItem(
                                 value: student.id,
-                                child: Text(
-                                  student.fullName,
-                                  overflow: TextOverflow.ellipsis,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Text(
+                                    student.fullName,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
                                 ),
                               );
                             }).toList(),
