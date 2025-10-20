@@ -116,7 +116,8 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         builder: (context, setDialogState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 16,
-          child: Container(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
               maxHeight: MediaQuery.of(context).size.height * 0.85,
@@ -126,7 +127,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.orange.shade600, Colors.amber.shade400],
@@ -162,6 +163,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             fontSize: 20,
                           ),
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ],
@@ -189,7 +191,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             items: students.map((student) {
                               return DropdownMenuItem(
                                 value: student.id,
-                                child: Text(student.fullName),
+                                child: Text(
+                                  student.fullName,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               );
                             }).toList(),
                             onChanged: (value) => setDialogState(() => chosenStudentId = value),
@@ -301,7 +306,8 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         builder: (context, setDialogState) => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           elevation: 16,
-          child: Container(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
               maxHeight: MediaQuery.of(context).size.height * 0.85,
@@ -311,7 +317,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
               children: [
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [Colors.orange.shade600, Colors.amber.shade400],
@@ -347,6 +353,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                             fontSize: 20,
                           ),
                           overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ),
                     ],
@@ -722,16 +729,20 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                       ),
                       child: DropdownButtonFormField<int>(
                         value: selectedSessionId,
-                        decoration: InputDecoration(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
                           labelText: 'Select Session',
-                          prefixIcon: const Icon(Icons.book, color: Colors.orange),
+                          prefixIcon: Icon(Icons.book, color: Colors.orange),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         ),
                         items: sessions.map((session) {
                           return DropdownMenuItem(
                             value: session.id,
-                            child: Text(session.title),
+                            child: Text(
+                              session.title,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) async {
@@ -798,10 +809,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
 
   Widget _buildEmptySessionsState() {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: const EdgeInsets.all(28),
@@ -824,6 +836,8 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                 color: Colors.grey.shade700,
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 10),
             const Padding(
@@ -835,6 +849,8 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                   fontSize: 14,
                   color: Colors.grey,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -845,10 +861,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
 
   Widget _buildEmptyProgressState() {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: const EdgeInsets.all(28),
@@ -871,6 +888,8 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                 color: Colors.grey.shade700,
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 10),
             Padding(
@@ -884,24 +903,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                   fontSize: 14,
                   color: Colors.grey.shade500,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (searchController.text.isEmpty) ...[
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _openAddProgressDialog,
-                icon: const Icon(Icons.add),
-                label: const Text('Record First Progress'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -1371,6 +1376,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -1401,7 +1407,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
+                  maxLines: label == 'Remarks:' ? 10 : 2,
                 ),
               ],
             ),
