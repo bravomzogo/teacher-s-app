@@ -74,6 +74,8 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
     String selectedDayValue = edit?.dayOfWeek ?? 'Monday';
     bool notificationsEnabled = edit?.notificationsEnabled ?? true;
     int notificationMinutes = edit?.notificationMinutesBefore ?? 15;
+    bool endNotificationsEnabled = edit?.endNotificationsEnabled ?? false;
+    int endNotificationMinutes = edit?.endNotificationMinutesBefore ?? 0;
     final formKey = GlobalKey<FormState>();
 
     await showDialog(
@@ -84,7 +86,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
           elevation: 16,
           child: Container(
             constraints: BoxConstraints(
-              maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+              maxWidth: MediaQuery.of(context).size.width * 0.95, // Increased dialog width
               maxHeight: MediaQuery.of(context).size.height * 0.85,
             ),
             child: Column(
@@ -188,7 +190,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                           ),
                           const SizedBox(height: 16),
 
-                          // Time Pickers - UPDATED: dialOnly to remove keyboard switch button
+                          // Time Pickers
                           Row(
                             children: [
                               Expanded(
@@ -211,18 +213,16 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                           child: child!,
                                         );
                                       },
-                                      initialEntryMode: TimePickerEntryMode.dialOnly, // Force dial mode only
+                                      initialEntryMode: TimePickerEntryMode.dialOnly,
                                     );
                                     if (time != null) {
                                       setDialogState(() => startTime = time);
                                     }
                                   },
                                   icon: const Icon(Icons.access_time, size: 20),
-                                  label: Flexible(
-                                    child: Text(
-                                      startTime.format(context),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                  label: Text(
+                                    startTime.format(context),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -256,18 +256,16 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                           child: child!,
                                         );
                                       },
-                                      initialEntryMode: TimePickerEntryMode.dialOnly, // Force dial mode only
+                                      initialEntryMode: TimePickerEntryMode.dialOnly,
                                     );
                                     if (time != null) {
                                       setDialogState(() => endTime = time);
                                     }
                                   },
                                   icon: const Icon(Icons.access_time, size: 20),
-                                  label: Flexible(
-                                    child: Text(
-                                      endTime.format(context),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                  label: Text(
+                                    endTime.format(context),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -296,12 +294,13 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                           ),
                           const SizedBox(height: 12),
 
-                          // Notifications Toggle
+                          // START Notifications Toggle
                           SwitchListTile(
-                            title: const Text('Enable Notifications'),
+                            title: const Text('Class Start Notifications'),
+                            subtitle: const Text('Remind me before class starts'),
                             value: notificationsEnabled,
                             onChanged: (value) => setDialogState(() => notificationsEnabled = value),
-                            secondary: const Icon(Icons.notifications, color: Colors.deepOrange),
+                            secondary: const Icon(Icons.notifications_active, color: Colors.deepOrange),
                             activeColor: Colors.deepOrange,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -309,7 +308,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                             tileColor: Colors.grey.shade50,
                           ),
 
-                          // Notification Minutes Dropdown
+                          // Start Notification Minutes Dropdown
                           if (notificationsEnabled) ...[
                             const SizedBox(height: 12),
                             Container(
@@ -366,6 +365,81 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                               ),
                             ),
                           ],
+
+                          const SizedBox(height: 12),
+
+                          // END Notifications Toggle
+                          SwitchListTile(
+                            title: const Text('Class End Notifications'),
+                            subtitle: const Text('Remind me when class is ending'),
+                            value: endNotificationsEnabled,
+                            onChanged: (value) => setDialogState(() => endNotificationsEnabled = value),
+                            secondary: const Icon(Icons.schedule, color: Colors.blue),
+                            activeColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            tileColor: Colors.grey.shade50,
+                          ),
+
+                          // End Notification Minutes Dropdown
+                          if (endNotificationsEnabled) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.blue.shade200),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.timer, color: Colors.blue, size: 20),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'End Notification Time',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: DropdownButtonFormField<int>(
+                                      value: endNotificationMinutes,
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                                      ),
+                                      items: const [
+                                        DropdownMenuItem(value: -5, child: Text('5 min after class')),
+                                        DropdownMenuItem(value: 0, child: Text('When class ends')),
+                                        DropdownMenuItem(value: 5, child: Text('5 min before ends')),
+                                        DropdownMenuItem(value: 10, child: Text('10 min before ends')),
+                                        DropdownMenuItem(value: 15, child: Text('15 min before ends')),
+                                      ],
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          setDialogState(() => endNotificationMinutes = value);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 20),
 
                           // Action Buttons
@@ -409,6 +483,8 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                         classroom: classroomCtrl.text.trim().isEmpty ? null : classroomCtrl.text.trim(),
                                         notificationsEnabled: notificationsEnabled,
                                         notificationMinutesBefore: notificationMinutes,
+                                        endNotificationsEnabled: endNotificationsEnabled,
+                                        endNotificationMinutesBefore: endNotificationMinutes,
                                       );
 
                                       if (edit == null) {
@@ -522,7 +598,8 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
 
     if (ok == true) {
       await db.deleteTimetable(t.id!);
-      await notifications.cancelNotification(t.id!);
+      // Cancel both start and end notifications
+      await notifications.cancelTimetableNotifications(t.id!);
       await _loadTimetable();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -897,10 +974,30 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    '🔔 ${entry.notificationMinutesBefore}min',
+                                    '🔔 ${entry.notificationMinutesBefore}min before',
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.green.shade700,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              if (entry.endNotificationsEnabled)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    entry.endNotificationMinutesBefore == 0
+                                        ? '⏰ At end'
+                                        : entry.endNotificationMinutesBefore > 0
+                                        ? '⏰ ${entry.endNotificationMinutesBefore}min before end'
+                                        : '⏰ ${entry.endNotificationMinutesBefore.abs()}min after',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.blue.shade700,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -957,7 +1054,7 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 500),
+            maxWidth: min(MediaQuery.of(context).size.width * 0.9, 1000),// Increased dialog width
             maxHeight: MediaQuery.of(context).size.height * 0.75,
           ),
           child: Column(
@@ -1024,9 +1121,22 @@ class _TimetableScreenState extends State<TimetableScreen> with TickerProviderSt
                       _buildDetailRow('Time:', entry.displayTime, Icons.access_time),
                       _buildDetailRow('Room:', entry.classroom ?? 'Not set', Icons.room),
                       _buildDetailRow(
-                        'Notifications:',
-                        entry.notificationsEnabled ? '${entry.notificationMinutesBefore}min before' : 'Disabled',
+                        'Start Notification:',
+                        entry.notificationsEnabled
+                            ? '${entry.notificationMinutesBefore} min before'
+                            : 'Disabled',
                         Icons.notifications,
+                      ),
+                      _buildDetailRow(
+                        'End Notification:',
+                        entry.endNotificationsEnabled
+                            ? (entry.endNotificationMinutesBefore == 0
+                            ? 'At class end'
+                            : entry.endNotificationMinutesBefore > 0
+                            ? '${entry.endNotificationMinutesBefore} min before end'
+                            : '${entry.endNotificationMinutesBefore.abs()} min after end')
+                            : 'Disabled',
+                        Icons.schedule,
                       ),
                       const SizedBox(height: 16),
                       SizedBox(

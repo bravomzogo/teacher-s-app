@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 import 'models/student.dart';
 import 'models/session.dart';
 import 'models/progress.dart';
-import 'models/timetable.dart'; // Add this import
+import 'models/timetable.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
@@ -11,7 +11,7 @@ class DBHelper {
   DBHelper._internal();
 
   static Database? _db;
-  static const int _version = 4; // Update to version 4 for timetable
+  static const int _version = 5; // Updated to version 5 for end notifications
 
   Future<Database> get database async {
     if (_db != null) return _db!;
@@ -63,6 +63,27 @@ class DBHelper {
           createdAt TEXT DEFAULT (datetime('now'))
         )
       ''');
+    }
+
+    if (oldVersion < 5) {
+      // Migration from version 4 to 5 - Add end notification columns
+      try {
+        await db.execute(
+            'ALTER TABLE timetable ADD COLUMN endNotificationsEnabled INTEGER DEFAULT 0'
+        );
+        print('Added endNotificationsEnabled column');
+      } catch (e) {
+        print('Column endNotificationsEnabled might already exist: $e');
+      }
+
+      try {
+        await db.execute(
+            'ALTER TABLE timetable ADD COLUMN endNotificationMinutesBefore INTEGER DEFAULT 0'
+        );
+        print('Added endNotificationMinutesBefore column');
+      } catch (e) {
+        print('Column endNotificationMinutesBefore might already exist: $e');
+      }
     }
   }
 
@@ -168,7 +189,7 @@ class DBHelper {
       )
     ''');
 
-    // Add timetable table
+    // Add timetable table with end notification columns
     await db.execute('''
       CREATE TABLE IF NOT EXISTS timetable (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -179,6 +200,8 @@ class DBHelper {
         classroom TEXT,
         notificationsEnabled INTEGER DEFAULT 1,
         notificationMinutesBefore INTEGER DEFAULT 15,
+        endNotificationsEnabled INTEGER DEFAULT 0,
+        endNotificationMinutesBefore INTEGER DEFAULT 0,
         createdAt TEXT DEFAULT (datetime('now'))
       )
     ''');

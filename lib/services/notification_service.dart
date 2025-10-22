@@ -112,26 +112,71 @@ class NotificationService {
     print('Cancelled all notifications');
   }
 
+  // Helper to get end notification ID (add 10000 to distinguish from start notifications)
+  int _getEndNotificationId(int baseId) => baseId + 10000;
+
+  // Cancel both start and end notifications for a timetable entry
+  Future<void> cancelTimetableNotifications(int id) async {
+    await cancelNotification(id); // Start notification
+    await cancelNotification(_getEndNotificationId(id)); // End notification
+    print('Cancelled both start and end notifications for id: $id');
+  }
+
   Future<void> rescheduleAllTimetableNotifications(List<Timetable> timetable) async {
     print('Rescheduling ${timetable.length} timetable notifications...');
 
     await cancelAllNotifications();
 
     for (var entry in timetable) {
-      if (entry.notificationsEnabled && entry.id != null) {
-        final notificationTime = entry.nextOccurrence.subtract(
-            Duration(minutes: entry.notificationMinutesBefore)
-        );
-
-        if (notificationTime.isAfter(DateTime.now())) {
-          await scheduleTimetableNotification(
-            id: entry.id!,
-            title: 'Class Reminder: ${entry.subject}',
-            body: 'Your ${entry.subject} class starts at ${entry.startTime}${entry.classroom != null ? ' in ${entry.classroom}' : ''}',
-            scheduleTime: notificationTime,
+      if (entry.id != null) {
+        // Schedule start notification
+        if (entry.notificationsEnabled) {
+          final startNotificationTime = entry.nextOccurrence.subtract(
+              Duration(minutes: entry.notificationMinutesBefore)
           );
-        } else {
-          print('Skipping past notification for ${entry.subject}');
+
+          if (startNotificationTime.isAfter(DateTime.now())) {
+            await scheduleTimetableNotification(
+              id: entry.id!,
+              title: 'Class Reminder: ${entry.subject}',
+              body: 'Your ${entry.subject} class starts at ${entry.startTime}${entry.classroom != null ? ' in ${entry.classroom}' : ''}',
+              scheduleTime: startNotificationTime,
+            );
+          } else {
+            print('Skipping past start notification for ${entry.subject}');
+          }
+        }
+
+        // Schedule end notification
+        if (entry.endNotificationsEnabled) {
+          final endTime = entry.nextEndOccurrence;
+
+          // Calculate notification time based on endNotificationMinutesBefore
+          // Positive values = before end, Negative values = after end, 0 = exactly at end
+          final endNotificationTime = endTime.subtract(
+              Duration(minutes: entry.endNotificationMinutesBefore)
+          );
+
+          if (endNotificationTime.isAfter(DateTime.now())) {
+            String notificationBody;
+            if (entry.endNotificationMinutesBefore == 0) {
+              notificationBody = 'Your ${entry.subject} class has ended';
+            } else if (entry.endNotificationMinutesBefore > 0) {
+              notificationBody = 'Your ${entry.subject} class ends in ${entry.endNotificationMinutesBefore} minutes';
+            } else {
+              final absMinutes = entry.endNotificationMinutesBefore.abs();
+              notificationBody = 'Your ${entry.subject} class ended $absMinutes minutes ago';
+            }
+
+            await scheduleTimetableNotification(
+              id: _getEndNotificationId(entry.id!),
+              title: 'Class Ending: ${entry.subject}',
+              body: notificationBody,
+              scheduleTime: endNotificationTime,
+            );
+          } else {
+            print('Skipping past end notification for ${entry.subject}');
+          }
         }
       }
     }
