@@ -37,15 +37,84 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+    _checkDatabaseIntegrity();
     _loadAll();
     searchController.addListener(_filterProgress);
     _headerController.forward();
   }
 
+  // ========== DEBUG METHODS ==========
+
+  Future<void> _checkDatabaseIntegrity() async {
+    print('\n========== DATABASE INTEGRITY CHECK ==========');
+    final database = await db.database;
+
+    // Check if progress table exists and has correct schema
+    final tableInfo = await database.rawQuery('PRAGMA table_info(progress)');
+    print('Progress Table Schema:');
+    for (var col in tableInfo) {
+      print('  ${col['name']}: ${col['type']}');
+    }
+
+    // Check all progress records
+    final allProgress = await database.rawQuery('SELECT * FROM progress');
+    print('\nAll Progress Records in DB: ${allProgress.length}');
+    for (var p in allProgress) {
+      print('  $p');
+    }
+
+    print('=============================================\n');
+  }
+
+  Future<void> _debugDatabase() async {
+    print('\n========== DATABASE DEBUG ==========');
+
+    // Check all students
+    final allStudents = await db.getAllStudents();
+    print('Total Students: ${allStudents.length}');
+    for (var student in allStudents) {
+      print('  Student ID: ${student.id}, Name: ${student.fullName}');
+    }
+
+    // Check progress for current session
+    if (selectedSessionId != null) {
+      print('\nCurrent Session ID: $selectedSessionId');
+
+      final progressList = await db.getProgressForSession(selectedSessionId!);
+      print('Total Progress Records: ${progressList.length}');
+      for (var p in progressList) {
+        print('  Progress ID: ${p.id}, StudentID: ${p.studentId}, Score: ${p.score}, Remarks: ${p.remarks}');
+      }
+
+      final joined = await db.getProgressJoined(selectedSessionId!);
+      print('\nJoined Progress Records: ${joined.length}');
+      for (var entry in joined) {
+        print('  ${entry['firstName']} ${entry['lastName']} (ID: ${entry['studentId']}): Score ${entry['score']}, Remarks: ${entry['remarks']}');
+      }
+
+      print('\nFiltered Progress Entries (UI): ${filteredProgressEntries.length}');
+      for (var entry in filteredProgressEntries) {
+        print('  ${entry['firstName']} ${entry['lastName']}: ${entry['score']}');
+      }
+    }
+
+    print('====================================\n');
+  }
+
+  // ========== ORIGINAL METHODS ==========
+
   Future<void> _loadAll() async {
     setState(() => loading = true);
     sessions = await db.getAllSessions();
     students = await db.getAllStudents();
+
+    print('\n=== LOADING DATA ===');
+    print('Loaded ${students.length} students:');
+    for (var s in students) {
+      print('  - ${s.fullName} (ID: ${s.id})');
+    }
+    print('Loaded ${sessions.length} sessions');
+
     if (sessions.isNotEmpty && selectedSessionId == null) {
       selectedSessionId = sessions.first.id;
     }
@@ -55,17 +124,32 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
   }
 
   Future<void> _loadProgress() async {
+    print('\n=== LOADING PROGRESS ===');
+    print('Selected Session ID: $selectedSessionId');
+
     if (selectedSessionId == null) {
       progressEntries = [];
       filteredProgressEntries = [];
       setState(() {});
       return;
     }
-    progressEntries = await db.getProgressJoined(selectedSessionId!);
+
+    // Create a mutable copy of the list to avoid read-only errors
+    final dbResults = await db.getProgressJoined(selectedSessionId!);
+    progressEntries = List<Map<String, dynamic>>.from(dbResults);
+
+    print('Loaded ${progressEntries.length} progress entries from database');
+
+    for (var entry in progressEntries) {
+      print('  Entry: ${entry['firstName']} ${entry['lastName']} - Score: ${entry['score']}');
+    }
+
     _sortProgress();
     setState(() {
       filteredProgressEntries = progressEntries;
     });
+
+    print('After filtering: ${filteredProgressEntries.length} entries to display');
   }
 
   void _sortProgress() {
@@ -97,6 +181,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
         return fullName.contains(query) || remarks.contains(query);
       }).toList();
     });
+
+    print('\n=== FILTERING ===');
+    print('Search query: "$query"');
+    print('Filtered results: ${filteredProgressEntries.length}');
   }
 
   Future<void> _openAddProgressDialog() async {
@@ -202,7 +290,10 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                 ),
                               );
                             }).toList(),
-                            onChanged: (value) => setDialogState(() => chosenStudentId = value),
+                            onChanged: (value) {
+                              print('Selected student ID: $value');
+                              setDialogState(() => chosenStudentId = value);
+                            },
                             validator: (value) {
                               if (value == null) {
                                 return 'Please select a student';
@@ -265,14 +356,28 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                   ),
                                   onPressed: () async {
                                     if (formKey.currentState!.validate()) {
-                                      await db.insertProgress(Progress(
+                                      print('\n=== ATTEMPTING TO SAVE PROGRESS ===');
+                                      print('Selected Student ID: $chosenStudentId');
+                                      print('Selected Session ID: $selectedSessionId');
+                                      print('Score: $score');
+                                      print('Remarks: ${remarksCtrl.text.trim()}');
+
+                                      final progressId = await db.insertProgress(Progress(
                                         studentId: chosenStudentId!,
                                         sessionId: selectedSessionId!,
                                         score: score,
                                         remarks: remarksCtrl.text.trim(),
                                       ));
+
+                                      print('Inserted Progress ID: $progressId');
+                                      print('===================================\n');
+
                                       Navigator.pop(context);
                                       await _loadProgress();
+
+                                      // Debug after saving
+                                      await _debugDatabase();
+
                                       _showSuccessSnackbar('Progress recorded successfully', Icons.check_circle);
                                     }
                                   },
@@ -426,6 +531,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                     ),
                                   ),
                                   onPressed: () async {
+                                    print('\n=== UPDATING PROGRESS ===');
+                                    print('Progress ID: $progressId');
+                                    print('Student ID: $studentId');
+                                    print('New Score: $score');
+
                                     await db.updateProgress(Progress(
                                       id: progressId,
                                       studentId: studentId,
@@ -433,8 +543,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                                       score: score,
                                       remarks: remarksCtrl.text.trim(),
                                     ));
+
                                     Navigator.pop(context);
                                     await _loadProgress();
+                                    await _debugDatabase();
+
                                     _showSuccessSnackbar('Progress updated successfully', Icons.check_circle);
                                   },
                                   child: const Text(
@@ -506,8 +619,13 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
     );
 
     if (ok == true) {
+      print('\n=== DELETING PROGRESS ===');
+      print('Progress ID: $id');
+
       await db.deleteProgress(id);
       await _loadProgress();
+      await _debugDatabase();
+
       _showErrorSnackbar('Progress record deleted');
     }
   }
@@ -682,6 +800,11 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         onPressed: _loadAll,
                         tooltip: 'Refresh',
                       ),
+                      _buildHeaderIconButton(
+                        icon: Icons.bug_report,
+                        onPressed: _debugDatabase,
+                        tooltip: 'Debug',
+                      ),
                     ],
                   ),
                 ],
@@ -751,6 +874,7 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                           );
                         }).toList(),
                         onChanged: (value) async {
+                          print('Session changed to: $value');
                           setState(() => selectedSessionId = value);
                           await _loadProgress();
                         },

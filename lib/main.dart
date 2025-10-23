@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // App Icon/Logo Animation
+              // App Icon/Logo Animation - Now properly circular
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: ScaleTransition(
@@ -140,11 +140,23 @@ class _SplashScreenState extends State<SplashScreen>
                       ],
                     ),
                     child: ClipOval(
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Image.asset(
-                          'assets/logo.png',
-                          fit: BoxFit.contain,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.8),
+                            width: 3,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Image.asset(
+                            'assets/logo.png',
+                            fit: BoxFit.contain,
+                            // Force the image to fit within the circular bounds
+                          ),
                         ),
                       ),
                     ),
