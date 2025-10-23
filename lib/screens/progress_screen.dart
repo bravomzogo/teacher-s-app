@@ -800,11 +800,6 @@ class _ProgressScreenState extends State<ProgressScreen> with TickerProviderStat
                         onPressed: _loadAll,
                         tooltip: 'Refresh',
                       ),
-                      _buildHeaderIconButton(
-                        icon: Icons.bug_report,
-                        onPressed: _debugDatabase,
-                        tooltip: 'Debug',
-                      ),
                     ],
                   ),
                 ],
